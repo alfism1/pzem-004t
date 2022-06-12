@@ -6,7 +6,7 @@ from modbus_tk import modbus_rtu
 
 if __name__ == "__main__":
     try:
-        print("Connection to serial")
+        print("Connection to serial...")
         # Connect to the slave
         serial = serial.Serial(
                                port='/dev/ttyUSB0',
@@ -19,7 +19,8 @@ if __name__ == "__main__":
         i = 0
         while True:
             try:
-                print("Define modbus_rtu")
+                print("Connecting to modbus...")
+                time.sleep(3)
                 master = modbus_rtu.RtuMaster(serial)
                 master.set_timeout(2.0)
                 master.set_verbose(True)
@@ -41,10 +42,6 @@ if __name__ == "__main__":
                     print(str_payload)
 
                     time.sleep(1)
-
-                
-            except KeyboardInterrupt:
-                print('exiting pzem script')
             except Exception as e:
                 print(e)
                 print("Attempts:", i)
@@ -53,6 +50,8 @@ if __name__ == "__main__":
             finally:
                 master.close()
 
+    except KeyboardInterrupt:
+        print('exiting pzem script')
     except Exception as err:
         print("Serial connection failed")
     
