@@ -57,7 +57,8 @@ if __name__ == "__main__":
                     str_payload = json.dumps(dict_payload, indent=2)
                     print(str_payload)
 
-                    lcd.text(str(round(dict_payload["energy_Wh"]/1000, 2)) + " KwH", 1)
+                    lcd.text(str(round(dict_payload["energy_Wh"]/1000, 3)) + " kWh", 1)
+                    lcd.text(str(dict_payload["power_W"]) + " Wh", 1)
 
                     time.sleep(1)
             except Exception as e:
