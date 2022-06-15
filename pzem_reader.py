@@ -58,7 +58,7 @@ if __name__ == "__main__":
                     print(str_payload)
 
                     lcd.text(str(round(dict_payload["energy_Wh"]/1000, 3)) + " kWh", 1)
-                    lcd.text(str(dict_payload["power_W"]) + " Wh", 1)
+                    lcd.text(str(dict_payload["power_W"]) + " Wh", 2)
 
                     time.sleep(1)
             except Exception as e:
@@ -67,7 +67,10 @@ if __name__ == "__main__":
                 i = i + 1
                 continue
             finally:
+                print("Closing...")
+                lcd.clear()
                 master.close()
+                print("Closed")
 
     except KeyboardInterrupt:
         print('exiting pzem script')
