@@ -30,6 +30,7 @@ if __name__ == "__main__":
             xonxoff=0
         )
         i = 0
+        initialKwH = 0
         while True:
             try:
                 print("Connecting to modbus...")
@@ -57,8 +58,12 @@ if __name__ == "__main__":
                     str_payload = json.dumps(dict_payload, indent=2)
                     print(str_payload)
 
+                    if initialKwH == 0:
+                        print("initialKwH inisiated...")
+                        initialKwH = dict_payload["energy_Wh"]
+
                     lcd.text(str(round(dict_payload["energy_Wh"]/1000, 3)) + " kWh", 1)
-                    lcd.text(str(dict_payload["power_W"]) + " Wh", 2)
+                    lcd.text(str(initialKwH) + " Wh", 2)
 
                     time.sleep(1)
             except Exception as e:
