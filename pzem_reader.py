@@ -8,9 +8,16 @@ from rpi_lcd import LCD
 
 if __name__ == "__main__":
     lcd = LCD()
+    quotaKwH = 2
 
     def safe_exit(signum, frame):
         exit(1)
+
+    def calculate_quotaKwH(kwH_usage):
+        return quotaKwH - kwH_usage
+
+    def kwH_usage(energyWh, initialWh):
+        return energyWh - initialWh
 
     try:
         signal(SIGTERM, safe_exit)
@@ -31,6 +38,7 @@ if __name__ == "__main__":
         )
         i = 0
         initialKwH = 0
+        quotaKwH = 2
         while True:
             try:
                 print("Connecting to modbus...")
@@ -55,6 +63,7 @@ if __name__ == "__main__":
                     dict_payload["frequency_Hz"] = data[7] / 10.0  # [Hz]
                     dict_payload["power_factor"] = data[8] / 100.0
                     dict_payload["alarm"] = data[9]  # 0 = no alarm
+                    dict_payload["initialKwH"] = initialKwH
                     str_payload = json.dumps(dict_payload, indent=2)
                     print(str_payload)
 
@@ -62,8 +71,12 @@ if __name__ == "__main__":
                         print("initialKwH inisiated...")
                         initialKwH = dict_payload["energy_Wh"]
 
-                    lcd.text(str(round(dict_payload["energy_Wh"]/1000, 3)) + " kWh", 1)
-                    lcd.text(str(initialKwH) + " Wh", 2)
+                    lcd.text(
+                        str(round(dict_payload["energy_Wh"]/1000, 3)) + " kWh", 1)
+                    lcd.text(
+                        str(calculate_quotaKwH(kwH_usage(dict_payload["energy_Wh"], initialKwH))) + " Wh", 2)
+                    # lcd.text(
+                    #     str(kwH_usage(dict_payload["energy_Wh"], initialKwH)) + " Wh", 2)
 
                     time.sleep(1)
             except Exception as e:
