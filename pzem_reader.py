@@ -88,6 +88,11 @@ if __name__ == "__main__":
                         str(round(dict_payload["energy_Wh"]/1000, 3)) + " kWh", 1)
                     lcd.text(
                         str(calculate_quotaKwH(kwH_usage(dict_payload["energy_Wh"], initialKwH))) + " Wh", 2)
+
+                    # Disable relay once reach the quota
+                    if calculate_quotaKwH(kwH_usage(dict_payload["energy_Wh"], initialKwH)) == 0:
+                        toggle_relay(RELAIS_1_GPIO, "off")
+
                     # lcd.text(
                     #     str(kwH_usage(dict_payload["energy_Wh"], initialKwH)) + " Wh", 2)
 
