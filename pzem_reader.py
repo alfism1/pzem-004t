@@ -31,6 +31,7 @@ if __name__ == "__main__":
         return energyWh - initialWh
 
     try:
+        toggle_relay(RELAIS_1_GPIO, "on")
         signal(SIGTERM, safe_exit)
         signal(SIGHUP, safe_exit)
 
@@ -50,8 +51,6 @@ if __name__ == "__main__":
         i = 0
         initialKwH = 0
         quotaKwH = 2
-
-        toggle_relay(RELAIS_1_GPIO, "on")
 
         while True:
             try:
