@@ -5,10 +5,21 @@ import modbus_tk.defines as cst
 from modbus_tk import modbus_rtu
 from signal import signal, SIGTERM, SIGHUP, pause
 from rpi_lcd import LCD
+import RPi.GPIO as GPIO
 
 if __name__ == "__main__":
     lcd = LCD()
     quotaKwH = 2
+
+    GPIO.setmode(GPIO.BCM)  # GPIO Numbers instead of board numbers
+    RELAIS_1_GPIO = 23
+    GPIO.setup(RELAIS_1_GPIO, GPIO.OUT)  # GPIO Assign mode
+
+    def toggle_relay(gpio=RELAIS_1_GPIO, status=""):
+        if status == "on":
+            GPIO.output(gpio, GPIO.LOW)
+        if status == "off":
+            GPIO.output(gpio, GPIO.HIGH)
 
     def safe_exit(signum, frame):
         exit(1)
@@ -39,6 +50,9 @@ if __name__ == "__main__":
         i = 0
         initialKwH = 0
         quotaKwH = 2
+
+        toggle_relay(RELAIS_1_GPIO, "on")
+
         while True:
             try:
                 print("Connecting to modbus...")
@@ -88,6 +102,8 @@ if __name__ == "__main__":
                 print("Closing...")
                 lcd.clear()
                 master.close()
+                toggle_relay(RELAIS_1_GPIO, "off")
+                GPIO.cleanup()
                 print("Closed")
 
     except KeyboardInterrupt:
