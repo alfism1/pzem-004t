@@ -129,14 +129,14 @@ def splu_process(usbTty, relay_gpio, quotaKwH):
 
 
 if __name__ == "__main__":
-    queue_name = "splu_process"
+    queue_name = "payment_status"
     # Access the CLODUAMQP_URL environment variable and parse it (fallback to localhost)
     url = os.environ.get(
         'CLOUDAMQP_URL', os.getenv('RABBIT_MQ_URL'))
     params = pika.URLParameters(url)
     connection = pika.BlockingConnection(params)
     channel = connection.channel()  # start a channel
-    channel.queue_declare(queue=queue_name)  # Declare a queue
+    channel.queue_declare(queue=queue_name, durable=True)  # Declare a queue
 
     def callback(ch, method, properties, body):
         decode = body.decode("utf-8")
