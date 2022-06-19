@@ -140,7 +140,7 @@ if __name__ == "__main__":
 
     def callback(ch, method, properties, body):
         decode = body.decode("utf-8")
-        daya = json.loads(decode)["daya"]
+        daya = json.loads(decode)["daya_kwh"]
         splu_process("/dev/ttyUSB0", 23, daya)
         print("Waiting for the next message")
 
