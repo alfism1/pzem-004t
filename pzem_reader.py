@@ -6,13 +6,20 @@ from modbus_tk import modbus_rtu
 from signal import signal, SIGTERM, SIGHUP, pause
 from rpi_lcd import LCD
 import RPi.GPIO as GPIO
+import pika
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
-if __name__ == "__main__":
+GPIO.setmode(GPIO.BCM)  # GPIO Numbers instead of board numbers
+
+
+def splu_process(usbTty, relay_gpio, quotaKwH):
     lcd = LCD()
-    quotaKwH = 2
+    # quotaKwH = 2
+    splu_on = False
 
-    GPIO.setmode(GPIO.BCM)  # GPIO Numbers instead of board numbers
-    RELAIS_1_GPIO = 23
+    RELAIS_1_GPIO = relay_gpio
     GPIO.setup(RELAIS_1_GPIO, GPIO.OUT)  # GPIO Assign mode
 
     def toggle_relay(gpio=RELAIS_1_GPIO, status=""):
@@ -40,8 +47,8 @@ if __name__ == "__main__":
 
         print("Connection to serial...")
         # Connect to the slave
-        serial = serial.Serial(
-            port='/dev/ttyUSB0',
+        ser = serial.Serial(
+            port=usbTty,
             baudrate=9600,
             bytesize=8,
             parity='N',
@@ -50,13 +57,12 @@ if __name__ == "__main__":
         )
         i = 0
         initialKwH = 0
-        quotaKwH = 2
 
         while True:
             try:
                 print("Connecting to modbus...")
                 time.sleep(3)
-                master = modbus_rtu.RtuMaster(serial)
+                master = modbus_rtu.RtuMaster(ser)
                 master.set_timeout(2.0)
                 master.set_verbose(True)
                 # Changing power alarm value to 100 W
@@ -89,9 +95,9 @@ if __name__ == "__main__":
                     lcd.text(
                         str(calculate_quotaKwH(kwH_usage(dict_payload["energy_Wh"], initialKwH))) + " Wh", 2)
 
-                    # Disable relay once reach the quota
+                    # Block process once reach the quota. Go to finally
                     if calculate_quotaKwH(kwH_usage(dict_payload["energy_Wh"], initialKwH)) == 0:
-                        toggle_relay(RELAIS_1_GPIO, "off")
+                        return
 
                     # lcd.text(
                     #     str(kwH_usage(dict_payload["energy_Wh"], initialKwH)) + " Wh", 2)
@@ -104,13 +110,46 @@ if __name__ == "__main__":
                 continue
             finally:
                 print("Closing...")
-                lcd.clear()
+                # lcd.clear()
                 master.close()
-                toggle_relay(RELAIS_1_GPIO, "off")
-                GPIO.cleanup()
+                # toggle_relay(RELAIS_1_GPIO, "off")
                 print("Closed")
 
     except KeyboardInterrupt:
         print('exiting pzem script')
     except Exception as err:
         print("Serial connection failed")
+        print("Serial error: ", err)
+        toggle_relay(RELAIS_1_GPIO, "off")
+    finally:
+        toggle_relay(RELAIS_1_GPIO, "off")
+        lcd.clear()
+        lcd.text("Kuota KwH sudah habis", 1)
+        # GPIO.cleanup()
+
+
+if __name__ == "__main__":
+    queue_name = "splu_process"
+    # Access the CLODUAMQP_URL environment variable and parse it (fallback to localhost)
+    url = os.environ.get(
+        'CLOUDAMQP_URL', os.getenv('RABBIT_MQ_URL'))
+    params = pika.URLParameters(url)
+    connection = pika.BlockingConnection(params)
+    channel = connection.channel()  # start a channel
+    channel.queue_declare(queue=queue_name)  # Declare a queue
+
+    def callback(ch, method, properties, body):
+        decode = body.decode("utf-8")
+        daya = json.loads(decode)["daya"]
+        splu_process("/dev/ttyUSB0", 23, daya)
+        print("Waiting for the next message")
+
+    # set up subscription on the queue
+    channel.basic_consume(queue_name,
+                          callback,
+                          auto_ack=True)
+
+    # start consuming (blocks)
+    print("Waiting for message")
+    channel.start_consuming()
+    connection.close()
