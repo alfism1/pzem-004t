@@ -23,7 +23,8 @@ if __name__ == "__main__":
             decode = body.decode("utf-8")
             daya = json.loads(decode)["daya_kwh"]
             # pzem_reader.splu_process("/dev/ttyUSB0", 23, daya)
-            os.system("python3 pzem_reader.py /dev/ttyUSB0 23 " + daya + " &")
+            print("python3 pzem_reader.py /dev/ttyUSB0 23 " + daya + " &")
+            # os.system("python3 pzem_reader.py /dev/ttyUSB0 23 " + daya + " &")
             print(body)
             ch.basic_ack(delivery_tag=method.delivery_tag)
 
