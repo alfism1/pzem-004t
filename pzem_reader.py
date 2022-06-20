@@ -143,12 +143,12 @@ if __name__ == "__main__":
         daya = json.loads(decode)["daya_kwh"]
         splu_process("/dev/ttyUSB0", 23, daya)
         print("Waiting for the next message")
+        ch.basic_ack(delivery_tag=method.delivery_tag)
 
     # set up subscription on the queue
     channel.basic_qos(prefetch_count=1)
     channel.basic_consume(queue_name,
-                          callback,
-                          auto_ack=True)
+                          callback)
 
     # start consuming (blocks)
     print("Waiting for message")
