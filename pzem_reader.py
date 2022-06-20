@@ -14,10 +14,10 @@ GPIO.setmode(GPIO.BCM)  # GPIO Numbers instead of board numbers
 
 def splu_process():
     lcd = LCD()
-    quotaKwH = sys.argv[3]
+    quotaKwH = int(sys.argv[3])
     splu_on = False
 
-    RELAIS_1_GPIO = sys.argv[2]
+    RELAIS_1_GPIO = int(sys.argv[2])
     GPIO.setup(RELAIS_1_GPIO, GPIO.OUT)  # GPIO Assign mode
 
     def toggle_relay(gpio=RELAIS_1_GPIO, status=""):
