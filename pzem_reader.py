@@ -145,6 +145,7 @@ if __name__ == "__main__":
         print("Waiting for the next message")
 
     # set up subscription on the queue
+    channel.basic_qos(prefetch_count=1)
     channel.basic_consume(queue_name,
                           callback,
                           auto_ack=True)
