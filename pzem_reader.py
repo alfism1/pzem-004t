@@ -95,7 +95,7 @@ def splu_process(usbTty, relay_gpio, quotaKwH):
                     lcd.text("Sisa Wh:",
                              str(calculate_quotaKwH(kwH_usage(dict_payload["energy_Wh"], initialKwH))) + " Wh", 1)
                     lcd.text("Power W:",
-                             dict_payload["power_W"] + " W", 2)
+                             str(dict_payload["power_W"]) + " W", 2)
 
                     # Block process once reach the quota. Go to finally
                     if calculate_quotaKwH(kwH_usage(dict_payload["energy_Wh"], initialKwH)) == 0:
