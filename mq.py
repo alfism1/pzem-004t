@@ -1,4 +1,3 @@
-import sys
 import json
 import pika
 import os
@@ -21,11 +20,11 @@ if __name__ == "__main__":
             queue=queue_name, durable=True)  # Declare a queue
 
         def callback(ch, method, properties, body):
-            decode = body.decode("utf-8")
-            daya = json.loads(decode)["daya_kwh"]
-            # pzem_reader.splu_process("/dev/ttyUSB0", 23, daya)
-            os.system("python3 pzem_reader /dev/ttyUSB0 23 " + daya + "&")
-            print("Waiting for the next message")
+            # decode = body.decode("utf-8")
+            # daya = json.loads(decode)["daya_kwh"]
+            # # pzem_reader.splu_process("/dev/ttyUSB0", 23, daya)
+            # os.system("python3 pzem_reader /dev/ttyUSB0 23 " + daya + "&")
+            print(body)
             ch.basic_ack(delivery_tag=method.delivery_tag)
 
         # set up subscription on the queue
@@ -34,7 +33,7 @@ if __name__ == "__main__":
                               callback)
 
         try:
-            print('[*] Waiting for messages. To exit press CTRL+C')
+            print('[*] Waiting for messages.... To exit press CTRL+C')
             channel.start_consuming()
         except KeyboardInterrupt:
             channel.stop_consuming()
