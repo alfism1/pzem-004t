@@ -1,3 +1,4 @@
+import sys
 import time
 import json
 import serial
@@ -6,20 +7,17 @@ from modbus_tk import modbus_rtu
 from signal import signal, SIGTERM, SIGHUP, pause
 from rpi_lcd import LCD
 import RPi.GPIO as GPIO
-import pika
-import os
-from dotenv import load_dotenv
-load_dotenv()
+
 
 GPIO.setmode(GPIO.BCM)  # GPIO Numbers instead of board numbers
 
 
-def splu_process(usbTty, relay_gpio, quotaKwH):
+def splu_process():
     lcd = LCD()
-    # quotaKwH = 2
+    quotaKwH = sys.argv[3]
     splu_on = False
 
-    RELAIS_1_GPIO = relay_gpio
+    RELAIS_1_GPIO = sys.argv[2]
     GPIO.setup(RELAIS_1_GPIO, GPIO.OUT)  # GPIO Assign mode
 
     def toggle_relay(gpio=RELAIS_1_GPIO, status=""):
@@ -48,7 +46,7 @@ def splu_process(usbTty, relay_gpio, quotaKwH):
         print("Connection to serial...")
         # Connect to the slave
         ser = serial.Serial(
-            port=usbTty,
+            port=sys.argv[1],
             baudrate=9600,
             bytesize=8,
             parity='N',
@@ -130,47 +128,4 @@ def splu_process(usbTty, relay_gpio, quotaKwH):
         # GPIO.cleanup()
 
 
-if __name__ == "__main__":
-    queue_name = "payment_status"
-    # Access the CLODUAMQP_URL environment variable and parse it (fallback to localhost)
-    url = os.environ.get(
-        'CLOUDAMQP_URL', os.getenv('RABBIT_MQ_URL'))
-    params = pika.URLParameters(url)
-    params.heartbeat = 0
-    params.blocked_connection_timeout = 0
-    while True:
-        connection = pika.BlockingConnection(params)
-        channel = connection.channel()  # start a channel
-        channel.queue_declare(
-            queue=queue_name, durable=True)  # Declare a queue
-
-        def callback(ch, method, properties, body):
-            decode = body.decode("utf-8")
-            daya = json.loads(decode)["daya_kwh"]
-            splu_process("/dev/ttyUSB0", 23, daya)
-            print("Waiting for the next message")
-            ch.basic_ack(delivery_tag=method.delivery_tag)
-
-        # set up subscription on the queue
-        channel.basic_qos(prefetch_count=1)
-        channel.basic_consume(queue_name,
-                              callback)
-
-        try:
-            print('[*] Waiting for messages. To exit press CTRL+C')
-            channel.start_consuming()
-        except KeyboardInterrupt:
-            channel.stop_consuming()
-            connection.close()
-        except pika.exceptions.ConnectionClosedByBroker:
-            # Uncomment this to make the example not attempt recovery
-            # from server-initiated connection closure, including
-            # when the node is stopped cleanly
-            # except pika.exceptions.ConnectionClosedByBroker:
-            #     pass
-            continue
-        except pika.exceptions.StreamLostError:
-            continue
-        finally:
-            print("Restarted")
-            continue
+splu_process()

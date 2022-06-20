@@ -2,4 +2,4 @@
 .vscode
 publisher.py
 consumer.py
-test.py
+test*
