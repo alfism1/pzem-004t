@@ -134,6 +134,8 @@ if __name__ == "__main__":
     url = os.environ.get(
         'CLOUDAMQP_URL', os.getenv('RABBIT_MQ_URL'))
     params = pika.URLParameters(url)
+    params.heartbeat = 0
+    params.blocked_connection_timeout = 0
     connection = pika.BlockingConnection(params)
     channel = connection.channel()  # start a channel
     channel.queue_declare(queue=queue_name, durable=True)  # Declare a queue
