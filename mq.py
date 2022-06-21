@@ -11,8 +11,8 @@ if __name__ == "__main__":
     url = os.environ.get(
         'CLOUDAMQP_URL', os.getenv('RABBIT_MQ_URL'))
     params = pika.URLParameters(url)
-    params.heartbeat = 0
-    params.blocked_connection_timeout = 0
+    # params.heartbeat = 0
+    # params.blocked_connection_timeout = 0
     while True:
         connection = pika.BlockingConnection(params)
         channel = connection.channel()  # start a channel
@@ -26,12 +26,14 @@ if __name__ == "__main__":
             os.system("python3 pzem_reader.py /dev/ttyUSB0 23 " +
                       str(daya) + " &")
             print(body)
-            ch.basic_ack(delivery_tag=method.delivery_tag)
+            # ch.basic_ack(delivery_tag=method.delivery_tag)
 
-        # set up subscription on the queue
-        channel.basic_qos(prefetch_count=1)
+        # # set up subscription on the queue
+        # channel.basic_qos(prefetch_count=1)
+        # channel.basic_consume(queue_name,
+        #                       callback)
         channel.basic_consume(queue_name,
-                              callback)
+                              callback, auto_ack=True)
 
         try:
             print('[*] Waiting for messages.... To exit press CTRL+C')
