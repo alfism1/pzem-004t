@@ -13,9 +13,8 @@ GPIO.setmode(GPIO.BCM)  # GPIO Numbers instead of board numbers
 
 
 def splu_process():
-    lcd = LCD()
+    lcd = LCD(bus=1)
     quotaKwH = int(sys.argv[3])
-    splu_on = False
 
     RELAIS_1_GPIO = int(sys.argv[2])
     GPIO.setup(RELAIS_1_GPIO, GPIO.OUT)  # GPIO Assign mode
@@ -124,7 +123,7 @@ def splu_process():
     finally:
         toggle_relay(RELAIS_1_GPIO, "off")
         lcd.clear()
-        lcd.text("Kuota KwH sudah habis", 1)
+        lcd.text("Kuota kWh tidak tersedia", 1)
         # GPIO.cleanup()
 
 
