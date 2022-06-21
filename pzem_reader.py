@@ -95,7 +95,7 @@ def splu_process():
                     dict_payload["alarm"] = data[9]  # 0 = no alarm
                     dict_payload["initialKwH"] = initialKwH
                     str_payload = json.dumps(dict_payload, indent=2)
-                    print(str_payload)
+                    # print(str_payload)
 
                     if initialKwH == 0:
                         print("initialKwH inisiated...")
