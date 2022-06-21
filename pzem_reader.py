@@ -1,3 +1,4 @@
+import http.client
 import sys
 import time
 import json
@@ -10,6 +11,18 @@ import RPi.GPIO as GPIO
 
 
 GPIO.setmode(GPIO.BCM)  # GPIO Numbers instead of board numbers
+
+
+def update_stopkontak_status(status="active"):
+    conn = http.client.HTTPSConnection("ufatech.id")
+    payload = json.dumps({
+        "stopkontak": "stopkontak_0001",
+        "status": status
+    })
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    conn.request("POST", "/pln/api/update_stopkontak.php", payload, headers)
 
 
 def splu_process():
@@ -54,6 +67,7 @@ def splu_process():
         )
         i = 0
         initialKwH = 0
+        update_stopkontak_status(status="active")
 
         while True:
             try:
@@ -124,6 +138,7 @@ def splu_process():
         toggle_relay(RELAIS_1_GPIO, "off")
         lcd.clear()
         lcd.text("Kuota kWh tidak tersedia", 1)
+        update_stopkontak_status("nonactive")
         # GPIO.cleanup()
 
 
