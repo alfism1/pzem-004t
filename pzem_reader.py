@@ -23,6 +23,9 @@ def update_stopkontak_status(status="active"):
         'Content-Type': 'application/json'
     }
     conn.request("POST", "/pln/api/update_stopkontak.php", payload, headers)
+    res = conn.getresponse()
+    data = res.read()
+    print(data.decode("utf-8"))
 
 
 def splu_process():
@@ -135,10 +138,10 @@ def splu_process():
         print("Serial error: ", err)
         toggle_relay(RELAIS_1_GPIO, "off")
     finally:
+        update_stopkontak_status("nonactive")
         toggle_relay(RELAIS_1_GPIO, "off")
         lcd.clear()
         lcd.text("Kuota kWh tidak tersedia", 1)
-        update_stopkontak_status("nonactive")
         # GPIO.cleanup()
 
 
