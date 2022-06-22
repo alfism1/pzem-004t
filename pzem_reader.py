@@ -1,3 +1,4 @@
+import math
 import http.client
 import sys
 import time
@@ -33,7 +34,7 @@ def splu_process():
         lcd = LCD(bus=1)
     elif sys.argv[4] == "stopkontak_0002":
         lcd = LCD(bus=5)
-    quotaKwH = int(sys.argv[3])
+    quotaKwH = math.ceil(float(sys.argv[3]))
 
     RELAIS_1_GPIO = int(sys.argv[2])
     GPIO.setup(RELAIS_1_GPIO, GPIO.OUT)  # GPIO Assign mode
