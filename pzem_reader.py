@@ -13,10 +13,10 @@ import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BCM)  # GPIO Numbers instead of board numbers
 
 
-def update_stopkontak_status(status="active"):
+def update_stopkontak_status(status, stopkontak):
     conn = http.client.HTTPSConnection("ufatech.id")
     payload = json.dumps({
-        "stopkontak": "stopkontak_0001",
+        "stopkontak": stopkontak,
         "status": status
     })
     headers = {
@@ -29,7 +29,10 @@ def update_stopkontak_status(status="active"):
 
 
 def splu_process():
-    lcd = LCD(bus=1)
+    if sys.argv[4] == "stopkontak_0001":
+        lcd = LCD(bus=1)
+    elif sys.argv[4] == "stopkontak_0002":
+        lcd = LCD(bus=5)
     quotaKwH = int(sys.argv[3])
 
     RELAIS_1_GPIO = int(sys.argv[2])
@@ -70,7 +73,7 @@ def splu_process():
         )
         i = 0
         initialKwH = 0
-        update_stopkontak_status(status="active")
+        update_stopkontak_status(status="active", stopkontak=sys.argv[4])
 
         while True:
             try:
@@ -138,7 +141,7 @@ def splu_process():
         print("Serial error: ", err)
         toggle_relay(RELAIS_1_GPIO, "off")
     finally:
-        update_stopkontak_status("nonactive")
+        update_stopkontak_status(status="nonactive", stopkontak=sys.argv[4])
         toggle_relay(RELAIS_1_GPIO, "off")
         lcd.clear()
         lcd.text("Kuota kWh tidak tersedia", 1)

@@ -48,9 +48,16 @@ if __name__ == "__main__":
             # check stop kontak status. If active don't process
             if not is_stopkontak_active(stopkontak):
                 # pzem_reader.splu_process("/dev/ttyUSB0", 23, daya)
-                os.system("python3 pzem_reader.py /dev/ttyUSB0 23 " +
-                          str(daya) + " &")
+                pzem_cmd = ""
+                if stopkontak == "stopkontak_0001":
+                    pzem_cmd = "python3 pzem_reader.py /dev/ttyUSB0 23 " + \
+                        str(daya) + " " + stopkontak + " &"
+                elif stopkontak == "stopkontak_0002":
+                    pzem_cmd = "python3 pzem_reader.py /dev/ttyUSB1 22 " + \
+                        str(daya) + " " + stopkontak + " &"
+                    os.system(pzem_cmd)
             print(body)
+            print(pzem_cmd)
             # ch.basic_ack(delivery_tag=method.delivery_tag)
 
         # # set up subscription on the queue
