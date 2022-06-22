@@ -55,7 +55,7 @@ if __name__ == "__main__":
                 elif stopkontak == "stopkontak_0002":
                     pzem_cmd = "python3 pzem_reader.py /dev/ttyUSB1 22 " + \
                         str(daya) + " " + stopkontak + " &"
-                    os.system(pzem_cmd)
+                os.system(pzem_cmd)
             print(body)
             print(pzem_cmd)
             # ch.basic_ack(delivery_tag=method.delivery_tag)
